@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Python & Environment
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+.pytest_cache/
+peblo.db
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+
+# Logs & Environment Variables
+*.log
+.env
+
+# System & OS
+.DS_Store
+Thumbs.db

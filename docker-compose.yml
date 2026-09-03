@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: peblo_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: peblo_tv
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d peblo_tv"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: peblo_api
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgrespassword@db:5432/peblo_tv
+      - STORAGE_DIR=/app/storage
+      - SEED_DATA_DIR=/app/seed_data
+      - SECRET_KEY=super-secret-peblo-admin-key-2026
+    volumes:
+      - ./storage:/app/storage
+      - ./seed_data:/app/seed_data
+    depends_on:
+      db:
+        condition: service_healthy
+
+  cms:
+    build:
+      context: ./cms
+      dockerfile: Dockerfile
+    container_name: peblo_cms
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+
+  viewer:
+    build:
+      context: ./viewer
+      dockerfile: Dockerfile
+    container_name: peblo_viewer
+    ports:
+      - "3001:80"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
